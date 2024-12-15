@@ -4,6 +4,7 @@ lxml==5.3.0
 numpy==2.2.0
 pandas==2.2.3
 patsy==1.0.1
+plotly==5.22.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
 requests==2.32.3
