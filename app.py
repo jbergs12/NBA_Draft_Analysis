@@ -1,6 +1,6 @@
 # Here is some starter code to get the data:
 import streamlit as st
-import plotly.express as px
+# import plotly.express as px
 import numpy as np
 import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
