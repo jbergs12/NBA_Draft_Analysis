@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nba_draft.data_wrangling &mdash; NBA_Draft 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            NBA_Draft
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">NBA_Draft</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nba_draft.data_wrangling</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nba_draft.data_wrangling</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">ftfy</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span><span class="p">,</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">MarkupResemblesLocatorWarning</span>
+
+
+
+
+<div class="viewcode-block" id="get_draft">
+<a class="viewcode-back" href="../../nba_draft.html#nba_draft.data_wrangling.get_draft">[docs]</a>
+<span class="k">def</span> <span class="nf">get_draft</span><span class="p">(</span><span class="n">start_yr</span><span class="o">=</span><span class="mi">2015</span><span class="p">,</span> <span class="n">end_yr</span><span class="o">=</span><span class="mi">2024</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scrapes first-round draft data for the NBA from Basketball Reference&#39;s website</span>
+<span class="sd">    between the specified start and end years (inclusive).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        start_yr (int): Starting year for draft data retrieval.</span>
+<span class="sd">        end_yr (int): Ending year for draft data retrieval.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: A combined DataFrame containing draft information</span>
+<span class="sd">                          for all years between start_yr and end_yr where a successful response was received.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If start_yr is not an integer or end_yr is not an integer.</span>
+<span class="sd">      ValueError: If start_yr is after end_yr.</span>
+<span class="sd">      ValueError: If start_yr &lt; 1947 or end_yr &gt; 2024.</span>
+<span class="sd">      Exception: If no draft tables are found for any years in the specified range</span>
+<span class="sd">                 or if a request fails with an error status code.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - This function respects robots.txt and incorporates a one-second</span>
+<span class="sd">          delay between requests.</span>
+<span class="sd">        - It&#39;s recommended to use this function responsibly</span>
+<span class="sd">          and adhere to the website&#39;s terms of service.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_yr</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_yr</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;start_yr and end_yr must be integers&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start_yr</span> <span class="o">&gt;</span> <span class="n">end_yr</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;start_yr cannot be after end_yr&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start_yr</span> <span class="o">&lt;</span> <span class="mi">1947</span> <span class="ow">or</span> <span class="n">end_yr</span> <span class="o">&gt;</span> <span class="mi">2024</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data found before 1947 or after 2024&quot;</span><span class="p">)</span>
+
+    <span class="n">url1</span> <span class="o">=</span> <span class="s2">&quot;https://www.basketball-reference.com/draft/&quot;</span>
+    <span class="n">df_combined</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_yr</span><span class="p">,</span> <span class="n">end_yr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+      <span class="c1"># Get html</span>
+      <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1950</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url1</span> <span class="o">+</span> <span class="s2">&quot;BAA_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url1</span> <span class="o">+</span> <span class="s2">&quot;NBA_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">html</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request failed with status code </span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> for year </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="s2">&quot;html.parser&quot;</span><span class="p">)</span>
+
+      <span class="c1"># Get table</span>
+      <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">class_</span> <span class="o">=</span> <span class="s1">&#39;table_wrapper&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">class_</span> <span class="o">=</span> <span class="s1">&#39;sortable stats_table&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">table</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">index_to_drop</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Round 2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">index_to_drop</span><span class="p">[</span><span class="mi">0</span><span class="p">]:,])</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Draft_Yr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+      <span class="c1"># Combines tables</span>
+        <span class="k">if</span> <span class="n">df_combined</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="n">df_combined</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">df_combined</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_combined</span><span class="p">,</span> <span class="n">df</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">df_combined</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No draft tables found for any years in the specified range.&quot;</span><span class="p">)</span>
+
+      <span class="c1"># Fixes corrupted player names</span>
+      <span class="c1"># df_combined[&#39;Players&#39;] = df_combined[&#39;Players&#39;]</span>
+      <span class="n">df_combined</span> <span class="o">=</span> <span class="n">df_combined</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">])</span>
+      <span class="n">df_combined</span><span class="p">[</span><span class="s2">&quot;Player&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_combined</span><span class="p">[</span><span class="s2">&quot;Player&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ftfy</span><span class="o">.</span><span class="n">fix_text</span><span class="p">)</span>
+
+      
+      <span class="c1"># Changes duplicate column names</span>
+      <span class="n">finished_df</span> <span class="o">=</span> <span class="n">df_combined</span><span class="o">.</span><span class="n">set_axis</span><span class="p">([</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;Pk&#39;</span><span class="p">,</span> <span class="s1">&#39;Tm&#39;</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;College&#39;</span><span class="p">,</span> <span class="s1">&#39;Yrs&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;MP_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;TRB_tot&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;AST_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;FG%&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;FT%&#39;</span><span class="p">,</span> <span class="s1">&#39;MP&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;TRB&#39;</span><span class="p">,</span> <span class="s1">&#39;AST&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;WS/48&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;VORP&#39;</span><span class="p">,</span> <span class="s1">&#39;Draft_Yr&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+      
+    <span class="n">num_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;Pk&#39;</span><span class="p">,</span> <span class="s1">&#39;Yrs&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;MP_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;TRB_tot&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;AST_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;FG%&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;FT%&#39;</span><span class="p">,</span> <span class="s1">&#39;MP&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;TRB&#39;</span><span class="p">,</span> <span class="s1">&#39;AST&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;WS/48&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;VORP&#39;</span><span class="p">,</span> <span class="s1">&#39;Draft_Yr&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">num_cols</span><span class="p">:</span>
+      <span class="n">finished_df</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">finished_df</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">finished_df</span></div>
+
+
+
+
+<div class="viewcode-block" id="add_colleges">
+<a class="viewcode-back" href="../../nba_draft.html#nba_draft.data_wrangling.add_colleges">[docs]</a>
+<span class="k">def</span> <span class="nf">add_colleges</span><span class="p">(</span><span class="n">dframe</span><span class="p">):</span>
+
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds college-related information (Win Percentage and Strength of Schedule) to the draft data frame.</span>
+
+<span class="sd">    This function fetches college basketball data for each draft year from the Sports Reference website,</span>
+<span class="sd">    processes the data to extract relevant metrics, and then merges this data with the draft data based on </span>
+<span class="sd">    the college names.</span>
+
+<span class="sd">    The function performs the following steps:</span>
+<span class="sd">    1. Collects and processes basketball team statistics for each draft year from the Sports Reference website.</span>
+<span class="sd">    2. Creates a dictionary with processed data frames for each year containing team records and stats.</span>
+<span class="sd">    3. Matches the college name from the input data frame with the corresponding team data for the draft year.</span>
+<span class="sd">    4. Adds the college&#39;s Win Percentage (`WinPct_College`) and Strength of Schedule (`SOS_College`) to the input data frame.</span>
+<span class="sd">    5. Handles missing or incorrectly formatted college names through a predefined mapping.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dframe (pandas.DataFrame): The input data frame containing draft data, including the &#39;College&#39; and &#39;Draft_Yr&#39; columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: A modified version of the input data frame with additional columns for &#39;WinPct_College&#39; </span>
+<span class="sd">                          and &#39;SOS_College&#39; representing the college&#39;s win percentage and strength of schedule, respectively.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Exception: If the request to the Sports Reference website fails (non-200 status code).</span>
+<span class="sd">    </span>
+<span class="sd">    Notes:</span>
+<span class="sd">        - The function assumes the presence of the &#39;College&#39; and &#39;Draft_Yr&#39; columns in the input data frame.</span>
+<span class="sd">        - College names are mapped to their full names through a dictionary for better consistency. Colleges that do not appear on Sports-Reference have statistics recorded as NaN in dataframe.</span>
+<span class="sd">        - The function suppresses warnings related to markup resembling locators in HTML content because tables are embedded in comments on source websites.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  <span class="n">years</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="s1">&#39;Draft_Yr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://www.sports-reference.com/cbb/seasons/men/&quot;</span>
+  <span class="n">yrs_college</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">years</span><span class="p">:</span>
+    <span class="n">full_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}{</span><span class="n">year</span><span class="si">}</span><span class="s1">-standings.html&#39;</span>
+
+    <span class="c1"># Get html code</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">full_url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">html</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request failed with status code </span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> for year </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+
+    <span class="n">tables</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># (some of the tables are in commented sections in the html code)</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">Comment</span><span class="p">))</span>
+    
+    
+
+    <span class="c1"># Suppress only MarkupResemblesLocatorWarning</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">MarkupResemblesLocatorWarning</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">comments</span><span class="p">:</span>
+
+      <span class="n">comment_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+      <span class="n">tables_in_comment</span> <span class="o">=</span> <span class="n">comment_soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+      <span class="n">tables</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tables_in_comment</span><span class="p">)</span>
+
+
+    <span class="n">cleaned_tables</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">html_table</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span> <span class="c1"># getting all conference tables from the webpage</span>
+      <span class="c1"># get the table into a pandas df</span>
+      <span class="n">html_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">html_table</span><span class="p">)</span>
+      <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">html_string</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+      <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Unnamed&#39;</span><span class="p">)]</span>
+      <span class="n">cleaned_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">stacked_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cleaned_tables</span><span class="p">,</span> <span class="n">ignore_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">finished_df</span> <span class="o">=</span> <span class="n">stacked_df</span><span class="o">.</span><span class="n">set_axis</span><span class="p">([</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;School&#39;</span><span class="p">,</span> <span class="s1">&#39;Conf&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;W-L%&#39;</span><span class="p">,</span> <span class="s1">&#39;Conf_W&#39;</span><span class="p">,</span> <span class="s1">&#39;Conf_L&#39;</span><span class="p">,</span> <span class="s1">&#39;Conf_W-L%&#39;</span><span class="p">,</span> <span class="s1">&#39;Own&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;Opp&#39;</span><span class="p">,</span> <span class="s1">&#39;SRS&#39;</span><span class="p">,</span> <span class="s1">&#39;SOS&#39;</span><span class="p">,</span> <span class="s1">&#39;AP_Pre&#39;</span><span class="p">,</span> <span class="s1">&#39;AP_High&#39;</span><span class="p">,</span> <span class="s1">&#39;AP_Final&#39;</span><span class="p">,</span> <span class="s1">&#39;Notes&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">yrs_college</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">finished_df</span>
+
+  <span class="c1"># add college information to draft table</span>
+
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dframe</span><span class="p">)):</span>
+
+    <span class="n">college_name</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="s1">&#39;College&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">college_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;VCU&#39;</span><span class="p">:</span> <span class="s1">&#39;Virginia Commonwealth&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Central Florida&#39;</span><span class="p">:</span> <span class="s1">&#39;UCF&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;IUPUI&#39;</span><span class="p">:</span> <span class="s1">&#39;IU Indy&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Central Michigan University&#39;</span><span class="p">:</span> <span class="s1">&#39;Central Michigan&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Rice University&#39;</span><span class="p">:</span> <span class="s1">&#39;Rice&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Western Carolina University&#39;</span><span class="p">:</span> <span class="s1">&#39;Western Carolina&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;UConn&#39;</span><span class="p">:</span> <span class="s1">&#39;Connecticut&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Morehead State University&#39;</span><span class="p">:</span> <span class="s1">&#39;Morehead State&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Rider University&#39;</span><span class="p">:</span> <span class="s1">&#39;Rider&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SMU&#39;</span> <span class="p">:</span> <span class="s1">&#39;Southern Methodist&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;UNC Charlotte&#39;</span> <span class="p">:</span> <span class="s1">&#39;Charlotte&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USC&#39;</span> <span class="p">:</span> <span class="s1">&#39;Southern California&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;UW-Milwaukee&#39;</span> <span class="p">:</span> <span class="s1">&#39;Milwaukee&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BYU&#39;</span> <span class="p">:</span> <span class="s1">&#39;Brigham Young&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Cleveland State University&#39;</span> <span class="p">:</span> <span class="s1">&#39;Cleveland State&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Rutgers University&#39;</span> <span class="p">:</span> <span class="s1">&#39;Rutgers&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LSU&#39;</span> <span class="p">:</span> <span class="s1">&#39;Louisiana State&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Georgia State University&#39;</span> <span class="p">:</span> <span class="s1">&#39;Georgia State&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Loyola (MD)&#39;</span> <span class="p">:</span> <span class="s1">&#39;Loyola (MD)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Miami (FL)&#39;</span><span class="p">:</span> <span class="s1">&#39;Miami (FL)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;UNLV&#39;</span> <span class="p">:</span> <span class="s1">&#39;Nevada-Las Vegas&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;UNC&#39;</span> <span class="p">:</span> <span class="s1">&#39;North Carolina&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;St. John&#39;s&quot;</span> <span class="p">:</span> <span class="s2">&quot;St. John&#39;s (NY)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Texas-El Paso&quot;</span> <span class="p">:</span> <span class="s2">&quot;UTEP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;NYU&quot;</span> <span class="p">:</span> <span class="s2">&quot;New York University&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Marist College&quot;</span> <span class="p">:</span> <span class="s2">&quot;Marist&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ole Miss&quot;</span> <span class="p">:</span> <span class="s2">&quot;Mississippi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Southern University and A&amp;M College&quot;</span> <span class="p">:</span> <span class="s2">&quot;Southern&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;California State University, Los Angeles&quot;</span> <span class="p">:</span> <span class="s2">&quot;Cal State Los Angeles&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Loyola Chicago&quot;</span> <span class="p">:</span> <span class="s2">&quot;Loyola (IL)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;University of South Alabama&quot;</span> <span class="p">:</span> <span class="s2">&quot;South Alabama&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;United States Naval Academy&quot;</span> <span class="p">:</span> <span class="s2">&quot;Navy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Cal State Long Beach&quot;</span> <span class="p">:</span> <span class="s2">&quot;Long Beach State&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;UMass&quot;</span> <span class="p">:</span> <span class="s2">&quot;Massachusetts&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;University of Hartford&quot;</span> <span class="p">:</span> <span class="s2">&quot;Hartford&quot;</span>
+        <span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">college_name</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">college_name</span> <span class="ow">in</span> <span class="n">college_dict</span><span class="p">:</span>
+        <span class="n">college_name</span> <span class="o">=</span> <span class="n">college_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">college_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+      <span class="k">elif</span> <span class="s2">&quot; University&quot;</span> <span class="ow">in</span> <span class="n">college_name</span><span class="p">:</span>
+        <span class="n">college_name</span> <span class="o">=</span> <span class="n">college_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; University&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">college_name</span><span class="p">):</span>
+      <span class="n">college_name</span> <span class="o">=</span> <span class="n">college_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+      <span class="n">draft_year</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="s1">&#39;Draft_Yr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">team_records</span> <span class="o">=</span> <span class="n">yrs_college</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">draft_year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+      
+    
+      <span class="n">w_l_per</span> <span class="o">=</span> <span class="n">team_records</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">team_records</span><span class="p">[</span><span class="s1">&#39;School&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">college_name</span><span class="p">,</span> <span class="s1">&#39;W-L%&#39;</span><span class="p">]</span>
+      <span class="n">sos</span> <span class="o">=</span> <span class="n">team_records</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">team_records</span><span class="p">[</span><span class="s1">&#39;School&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">college_name</span><span class="p">,</span> <span class="s1">&#39;SOS&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">w_l_per</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">dframe</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;WinPct_College&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">w_l_per</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">dframe</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;WinPct_College&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">sos</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">dframe</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;SOS_College&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sos</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">dframe</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;SOS_College&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">NA</span>
+
+  <span class="k">return</span> <span class="n">dframe</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Josh Bergstrom, Morgan Kurth.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
