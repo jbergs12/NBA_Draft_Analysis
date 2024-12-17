@@ -8,6 +8,8 @@ The data pulled in this package comes from the following sources:
 
 [Link to Streamlit App](https://nba-draft-analysis.streamlit.app/)
 
+[Link to package documentation](https://jbergs12.github.io/NBA_Draft_Analysis/)
+
 # Package Info
 
 This package provides functions to gather and concatenate NBA Draft data ("get_draft()"). It also has a function to add information based on the athletes' senior years of college ("add_colleges()"). There are 3 functions to analyze the data.
