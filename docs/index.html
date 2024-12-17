@@ -73,9 +73,15 @@
              
   <section id="nba-draft-documentation">
 <h1>NBA_Draft documentation<a class="headerlink" href="#nba-draft-documentation" title="Link to this heading"></a></h1>
-<p>Add your content using <code class="docutils literal notranslate"><span class="pre">reStructuredText</span></code> syntax. See the
-<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a>
-documentation for details.</p>
+<p>NBA_Draft is a Python package inspired by the difficulty of finding datasets that combine college statistics with NBA Draft data. This package streamlines the process of collecting, enriching, and analyzing NBA Draft data, enabling deeper insights into player performance and draft outcomes.</p>
+<p>Key Features
+Data Wrangling</p>
+<p>get_draft(start_yr, end_yr): Scrape first-round NBA Draft data for a specified year range and return it as a Pandas DataFrame.
+add_colleges(dataframe): Enrich the draft data with college team statistics based on players’ senior years.
+Analysis Tools</p>
+<p>knn_analysis(dataframe): Perform K-Nearest Neighbor analyses to predict draft order with and without college stats.
+dtree_analysis(dataframe): Conduct decision tree analyses to predict draft order, comparing models with and without college stats.
+linreg_analysis(dataframe): Run linear regression models to predict draft order and compare RMSE values.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -84,10 +90,9 @@ documentation for details.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nba_draft.html">nba_draft package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nba_draft.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nba_draft.html#modules">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nba_draft.html#module-nba_draft.data_analysis">nba_draft.data_analysis module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nba_draft.html#module-nba_draft.data_wrangling">nba_draft.data_wrangling module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nba_draft.html#module-nba_draft">Module contents</a></li>
 </ul>
 </li>
 </ul>
