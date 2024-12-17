@@ -14,6 +14,9 @@ The data pulled in this package comes from the following sources:
 
 This package provides functions to gather and concatenate NBA Draft data ("get_draft()"). It also has a function to add information based on the athletes' senior years of college ("add_colleges()"). There are 3 functions to analyze the data.
 
+You can install this package using the terminal command:
+pip install git+https://github.com/jbergs12/NBA_Draft_Analysis.git
+
 # Data Wrangling Functions
 
 get_draft(start_yr, end_yr): scrapes data on the first round of the NBA draft from each year in the user-specified range. Returns a pandas dataframe.
