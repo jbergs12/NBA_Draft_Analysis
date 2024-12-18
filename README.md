@@ -15,13 +15,14 @@ Citation:
 
 [Link to college standings data](https://www.sports-reference.com/cbb/seasons/men/2025-standings.html)
 
+
 [Link to Streamlit App](https://nba-draft-analysis.streamlit.app/)
 
-[Link to package documentation](https://jbergs12.github.io/NBA_Draft_Analysis/)
+[Link to Package Documentation](https://jbergs12.github.io/NBA_Draft_Analysis/)
 
 # Package Info
 
-This package provides functions to gather and concatenate NBA Draft data ("get_draft()"). It also has a function to add information based on the athletes' senior years of college ("add_colleges()"). There are 3 functions to analyze the data.
+This package provides functions to gather and concatenate NBA Draft data ("get_draft()"). It also has a function to add information based on the athletes' senior year of college ("add_colleges()"). There are 3 functions to analyze the data.
 
 You can install this package using the terminal command:
 pip install git+https://github.com/jbergs12/NBA_Draft_Analysis.git
