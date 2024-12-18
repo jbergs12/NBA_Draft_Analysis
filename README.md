@@ -2,7 +2,16 @@
 
 The data pulled in this package comes from the following sources:
 
+Citation: 
+
+NBA Draft. basketball-reference.com, 2024.
+
 [Link to draft data](https://www.basketball-reference.com/draft/NBA_2024.html)
+
+Citation: 
+
+2024-25 men’s college basketball conference standings.
+sports-reference.com, 2024.
 
 [Link to college standings data](https://www.sports-reference.com/cbb/seasons/men/2025-standings.html)
 
