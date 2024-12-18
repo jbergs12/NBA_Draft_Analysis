@@ -15,8 +15,8 @@ def get_draft(start_yr=2015, end_yr=2024):
     between the specified start and end years (inclusive).
 
     Args:
-        start_yr (int): Starting year for draft data retrieval.
-        end_yr (int): Ending year for draft data retrieval.
+        start_yr (int): Starting year for draft data retrieval (default is 2015).
+        end_yr (int): Ending year for draft data retrieval (default is 2024).
 
     Returns:
         pandas.DataFrame: A combined DataFrame containing draft information

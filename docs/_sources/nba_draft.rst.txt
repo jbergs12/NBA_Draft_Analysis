@@ -2,7 +2,7 @@ nba\_draft package
 ==================
 
 Modules
--------
+----------
 
 nba\_draft.data\_analysis module
 --------------------------------

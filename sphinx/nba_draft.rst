@@ -1,7 +1,7 @@
 nba\_draft package
 ==================
 
-Submodules
+Modules
 ----------
 
 nba\_draft.data\_analysis module
@@ -16,14 +16,6 @@ nba\_draft.data\_wrangling module
 ---------------------------------
 
 .. automodule:: nba_draft.data_wrangling
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: nba_draft
    :members:
    :undoc-members:
    :show-inheritance:
