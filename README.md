@@ -35,8 +35,8 @@ add_colleges(dataframe): takes the dataframe returned by get_draft and adds stat
 
 # Analysis Functions
 
-knn_analysis(dataframe): takes the dataframe returned by get_draft and performs two K-Nearest Neigbor analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the accuracy of the two models.
+knn_analysis(dataframe): takes the dataframe returned by add_colleges and performs two K-Nearest Neigbor analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the accuracy of the two models.
 
-dtree_analysis(dataframe): takes the dataframe returned by get_draft and performs two decision tree analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the accuracy of the two models.
+dtree_analysis(dataframe): takes the dataframe returned by add_colleges and performs two decision tree analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the accuracy of the two models.
 
-linreg_analysis(dataframe): takes the dataframe returned by get_draft and performs two linear regression analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the rmse of the two models.
+linreg_analysis(dataframe): takes the dataframe returned by add_colleges and performs two linear regression analyses, one that uses college stats as predictors and one that does not. It attempts to predict the draft order of the players and compares the rmse of the two models.
