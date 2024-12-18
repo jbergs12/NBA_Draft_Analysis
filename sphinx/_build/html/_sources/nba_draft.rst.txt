@@ -1,10 +1,7 @@
 nba\_draft package
 ==================
 
-Modules
-----------
-
-nba\_draft.data\_analysis module
+data\_analysis
 --------------------------------
 
 .. automodule:: nba_draft.data_analysis
@@ -12,10 +9,16 @@ nba\_draft.data\_analysis module
    :undoc-members:
    :show-inheritance:
 
-nba\_draft.data\_wrangling module
+data\_wrangling
 ---------------------------------
 
 .. automodule:: nba_draft.data_wrangling
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+Example
+---------------------------------
+.. code-block:: python
+   print("Hello World!")

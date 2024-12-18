@@ -34,6 +34,13 @@ def get_draft(start_yr=2015, end_yr=2024):
           delay between requests.
         - It's recommended to use this function responsibly
           and adhere to the website's terms of service.
+
+    Example:
+        .. code-block:: python
+
+            result = get_draft(2020, 2024)
+            print(result.head())
+
     """
     if not isinstance(start_yr, int) or not isinstance(end_yr, int):
       raise ValueError("start_yr and end_yr must be integers")
@@ -125,6 +132,14 @@ def add_colleges(dframe):
         - The function assumes the presence of the 'College' and 'Draft_Yr' columns in the input data frame.
         - College names are mapped to their full names through a dictionary for better consistency. Colleges that do not appear on Sports-Reference have statistics recorded as NaN in dataframe.
         - The function suppresses warnings related to markup resembling locators in HTML content because tables are embedded in comments on source websites.
+    
+    Example:
+        .. code-block:: python
+
+            df = get_draft(2020, 2024)
+            result = add_colleges(df)
+            print(result.head())
+
     """
   years = dframe['Draft_Yr'].unique()
   url = "https://www.sports-reference.com/cbb/seasons/men/"

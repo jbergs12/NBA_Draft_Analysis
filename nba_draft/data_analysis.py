@@ -25,6 +25,14 @@ def knn_analysis(dframe, n=3):
 
     Raises:
         Exception: If there are fewer than 3 players at each draft position in inputted dataframe, cross validation will not be calculated.
+    
+Example:
+        .. code-block:: python
+
+            df = get_draft(2020, 2024)
+            df_colls = add_colleges(df)
+            knn_analysis(df_colls) # Returns model accuracies
+
     """
     
     # Define the columns to exclude for two different feature sets: 
@@ -102,6 +110,14 @@ def dtree_analysis(dframe, depth=15):
 
     Raises:
         Exception: If there are fewer than 3 players at each draft position in inputted dataframe, cross validation will not be calculated.
+
+    Example:
+        .. code-block:: python
+
+            df = get_draft(2020, 2024)
+            df_colls = add_colleges(df)
+            dtree_analysis(df_colls) # Returns model accuracies
+        
     """
     
     # Define the columns to exclude for two different feature sets: one with college-related predictors and one without
@@ -185,6 +201,14 @@ def linreg_analysis(dframe):
     Returns:
         list: A list containing the OLS regression R-squared value for both feature sets:
               [summary_without_college_predictors, summary_with_college_predictors].
+    
+    Example:
+        .. code-block:: python
+
+            df = get_draft(2020, 2024)
+            df_colls = add_colleges(df)
+            linreg_analysis(df_colls) # Returns a list of model performance summaries
+
     """
     
     # Define columns to exclude for two different feature sets

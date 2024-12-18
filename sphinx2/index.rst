@@ -21,28 +21,6 @@ Analysis Tools
 - **dtree_analysis(dataframe)**: Conduct decision tree analyses to predict draft order, comparing models with and without college stats.
 - **linreg_analysis(dataframe)**: Run linear regression models to predict draft order and compare RMSE values.
 
-Example Usage
-=============
-
-How to use the functions:
-
-.. code-block:: python
-
-   from nba_draft import data_wrangling, data_analysis
-
-   # Example: Scrape NBA Draft data for 2020-2023
-   draft_data = data_wrangling.get_draft(2020, 2023)
-   
-   # Add college statistics
-   draft_w_college = data_wrangling.add_colleges(draft_data)
-
-   print(draft_w_college.head())
-
-   # Run analyses
-   data_analysis.knn_analysis(draft_w_college)
-   data_analysis.dtree_analysis(draft_w_college)
-   print(data_analysis.linreg_analysis(draft_w_college))
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
